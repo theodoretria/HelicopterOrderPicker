@@ -88,8 +88,8 @@ async def main():
     @client.on(events.NewMessage(
         chats=[helicopter_id], func=lambda e: is_message_for_me(e.message.message, helicopter_message_templates)))
     async def helicopter_order_handler(event: telethon.events.newmessage.NewMessage.Event):
-        await client.send_message(helicopter_order_picker_id, event.message)
-
+        # await client.send_message(helicopter_order_picker_id, event.message)
+        await client.forward_messages(helicopter_order_picker_id, event.message)
     await client.run_until_disconnected()
 
 
@@ -98,4 +98,3 @@ if __name__ == '__main__':
     loop.run_until_complete(main())
     loop.close()
 
-# %%
