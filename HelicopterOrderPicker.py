@@ -7,6 +7,7 @@ import shutil
 import re
 import asyncio
 
+
 async def main():
     api_id = 12503964
     api_hash = '7f6f3c9d695c8f1697d69f2466216d42'
@@ -16,10 +17,10 @@ async def main():
 
     client = telethon.TelegramClient(StringSession(string_session), api_id, api_hash)
     me = client.get_me()
-    client = await client.start()
-    helicopter_order_picker_id = 5673594362
+    await client.start()
+    helicopter_order_picker_id = -1001611765239
     svolota_id = -1001762078325
-    helicopter_id = -1001302195525
+    helicopter_id = '@RunAsHelicopter'
     helicopter_message_templates = [
         'статистика', 'теорвер', 'матстат',
         'ймовірністні', 'статистика',
@@ -27,13 +28,12 @@ async def main():
         'ймовірності', 'ймовирности',
         'теор вер', 'мат стат', 'ймовірностей'
     ]
-
     messages_dir = 'messages'
+
     try:
         os.mkdir(messages_dir)
     except FileExistsError:
         pass
-
 
     async def save_messages(client, message):
         for dir_path in os.listdir(messages_dir):
@@ -45,7 +45,6 @@ async def main():
         await client.download_media(message, os.path.join(dir_path, f'media_{message.id}'))
         with open(os.path.join(dir_path, f'message_{message.id}.txt', ), 'w', encoding="utf-8") as f:
             f.write(f'{message.peer_id}: {message.message}')
-
 
     def find_deleted_message(deleted_id):
         for message_dir in os.listdir(messages_dir):
@@ -59,10 +58,8 @@ async def main():
                     return None, os.path.join(message_dir_path, os.listdir(message_dir_path)[0])
         return None, None
 
-
     def is_message_for_me(message, templtate):
         return any([re.search(template, message.lower()) for template in helicopter_message_templates])
-
 
     def delete_old_messages(dir_path):
         dir_time = os.path.getmtime(dir_path)
@@ -70,11 +67,10 @@ async def main():
         if life_time_min > 60:
             shutil.rmtree(dir_path)
 
-
     @client.on(events.NewMessage())
     async def save_message_handler(event: telethon.events.newmessage.NewMessage.Event):
-        await save_messages(client, event.message)
 
+        await save_messages(client, event.message)
 
     @client.on(events.MessageDeleted())
     async def send_deleted_message(event: telethon.events.MessageDeleted.Event):
@@ -89,14 +85,13 @@ async def main():
         if media:
             await client.send_file(svolota_id, media)
 
-
-    @client.on(events.NewMessage(chats=[helicopter_id], func=lambda e: is_message_for_me(e.message.message,
-                                                                                         templtate=helicopter_message_templates)))
-    async def save_message_handler(event: telethon.events.newmessage.NewMessage.Event):
+    @client.on(events.NewMessage(
+        chats=[helicopter_id], func=lambda e: is_message_for_me(e.message.message, helicopter_message_templates)))
+    async def helicopter_order_handler(event: telethon.events.newmessage.NewMessage.Event):
         await client.send_message(helicopter_order_picker_id, event.message)
 
-
     await client.run_until_disconnected()
+
 
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()
