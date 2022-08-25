@@ -52,7 +52,7 @@ async def main():
             if int(message_dir) == deleted_id:
                 message_dir_path = os.path.join(messages_dir, message_dir)
                 if len(os.listdir(message_dir_path)) >= 2:
-                    media, message = os.listdir(message_dir_path)
+                    media, message = sorted(os.listdir(message_dir_path))
                     return os.path.join(message_dir_path, media), os.path.join(message_dir_path, message)
                 else:
                     return None, os.path.join(message_dir_path, os.listdir(message_dir_path)[0])
