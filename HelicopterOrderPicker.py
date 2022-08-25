@@ -52,7 +52,7 @@ async def main():
             if int(message_dir) == deleted_id:
                 message_dir_path = os.path.join(messages_dir, message_dir)
                 if len(os.listdir(message_dir_path)) >= 2:
-                    media, message = sorted(os.listdir(message_dir_path))
+                    media, message = os.listdir(message_dir_path)
                     return os.path.join(message_dir_path, media), os.path.join(message_dir_path, message)
                 else:
                     return None, os.path.join(message_dir_path, os.listdir(message_dir_path)[0])
@@ -67,12 +67,12 @@ async def main():
         if life_time_min > 60:
             shutil.rmtree(dir_path)
 
-    @client.on(events.NewMessage())
+    @client.on(events.NewMessage(blacklist_chats=[helicopter_id]))
     async def save_message_handler(event: telethon.events.newmessage.NewMessage.Event):
 
         await save_messages(client, event.message)
 
-    @client.on(events.MessageDeleted())
+    @client.on(events.MessageDeleted(blacklist_chats=[helicopter_id]))
     async def send_deleted_message(event: telethon.events.MessageDeleted.Event):
         # await client.send_message('me', event)
         media, message = find_deleted_message(event.deleted_id)
